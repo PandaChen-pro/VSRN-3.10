@@ -13,8 +13,12 @@ VSRN项目是在跨模态系统中一个非常经典的图文检索任务，能�
 conda create -n vsrn python=3.10
 conda activate vsrn
 pip install torch torchvision -i https://pypi.mirrors.ustc.edu.cn/simple/
-# 安装pycocoevalcap和pycocotools后不再需要coco-caption和cocoapi-master文件夹
-pip install pycocoevalcap pycocotools -i https://pypi.mirrors.ustc.edu.cn/simple/
+# 安装pycocotools后不再需要cocoapi-master文件夹
+apt-get update
+apt install openjdk-11-jre
+pip install  pycocotools -i https://pypi.mirrors.ustc.edu.cn/simple/
+
+pip install tensorboard -i https://pypi.mirrors.ustc.edu.cn/simple/
 pip install tensorboard_logger -i https://pypi.mirrors.ustc.edu.cn/simple/
 pip install nltk -i https://pypi.mirrors.ustc.edu.cn/simple/
 python -c "import nltk;nltk.download()"
