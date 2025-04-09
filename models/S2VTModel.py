@@ -114,6 +114,7 @@ if __name__ == '__main__':
     vid_feats = torch.randn(32, 10, 2048)  # batch_size=32, n_frames=10, dim_vid=2048
     targets = torch.randint(0, 10000, (32, 20))  # batch_size=32, max_len=20
 
+    model.to(model.device)
     # Train mode
     seq_probs, seq_preds = model(vid_feats, targets, mode='train')
     print(f"Train mode - seq_probs shape: {seq_probs.shape}, seq_preds: {seq_preds}")

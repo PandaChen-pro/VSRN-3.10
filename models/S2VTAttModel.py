@@ -43,12 +43,13 @@ class S2VTAttModel(nn.Module):
 
 if __name__ == '__main__':
     # Simple test
-    from models.EncoderRNN import EncoderRNN
-    from models.DecoderRNN import DecoderRNN
+    from EncoderRNN import EncoderRNN
+    from DecoderRNN import DecoderRNN
 
     encoder = EncoderRNN(dim_vid=2048, dim_hidden=512)
     decoder = DecoderRNN(vocab_size=10000, max_len=20, dim_hidden=512, dim_word=300)
     model = S2VTAttModel(encoder, decoder)
+    model.to(model.device)
 
     vid_feats = torch.randn(32, 10, 2048)  # batch_size=32, seq_len=10, dim_vid=2048
     targets = torch.randint(0, 10000, (32, 20))  # batch_size=32, max_len=20

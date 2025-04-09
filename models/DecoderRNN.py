@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from .Attention import Attention
+from Attention import Attention
 
 
 class DecoderRNN(nn.Module):
@@ -86,16 +86,24 @@ class DecoderRNN(nn.Module):
         temperature = opt.get('temperature', 1.0)
 
         batch_size = encoder_outputs.size(0)
+        device = encoder_outputs.device
+        if encoder_hidden is not None:
+            encoder_hidden = encoder_hidden.to(device)
+        if targets is not None:
+            targets = targets.to(device)
+
         decoder_hidden = self._init_rnn_state(encoder_hidden)
 
         seq_logprobs = []
         seq_preds = []
 
         if mode == 'train':
-            targets_emb = self.embedding(targets).to(self.device)
+            targets_emb = self.embedding(targets).to(device)
             for i in range(self.max_length - 1):
                 current_words = targets_emb[:, i, :]
                 context = self.attention(decoder_hidden.squeeze(0), encoder_outputs)
+                current_words = current_words.to(device)
+                context = context.to(device)
                 decoder_input = torch.cat([current_words, context], dim=1)
                 decoder_input = self.input_dropout(decoder_input).unsqueeze(1)
                 decoder_output, decoder_hidden = self.rnn(decoder_input, decoder_hidden)
@@ -110,7 +118,7 @@ class DecoderRNN(nn.Module):
             for t in range(self.max_length - 1):
                 context = self.attention(decoder_hidden.squeeze(0), encoder_outputs)
                 if t == 0:  # Start with <sos>
-                    it = torch.full((batch_size,), self.sos_id, dtype=torch.long, device=self.device)
+                    it = torch.full((batch_size,), self.sos_id, dtype=torch.long, device=device)
                 elif sample_max:
                     sample_logprobs, it = torch.max(logprobs, dim=1)
                     seq_logprobs.append(sample_logprobs.unsqueeze(1))

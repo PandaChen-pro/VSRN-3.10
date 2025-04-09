@@ -27,6 +27,7 @@ class EncoderRNN(nn.Module):
         self.bidirectional = bidirectional
         self.rnn_cell = rnn_cell
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        
 
         self.vid2hid = nn.Linear(dim_vid, dim_hidden)
         self.input_dropout = nn.Dropout(input_dropout_p)
@@ -39,6 +40,8 @@ class EncoderRNN(nn.Module):
         # Initialize weights
         nn.init.xavier_normal_(self.vid2hid.weight)
         nn.init.zeros_(self.vid2hid.bias)
+
+        self.to(self.device)
 
     def forward(self, vid_feats):
         """
@@ -65,7 +68,8 @@ class EncoderRNN(nn.Module):
 if __name__ == '__main__':
     # Simple test
     encoder = EncoderRNN(dim_vid=2048, dim_hidden=512)
-    vid_feats = torch.randn(32, 10, 2048)  # batch_size=32, seq_len=10, dim_vid=2048
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    vid_feats = torch.randn(32, 10, 2048).to(device)  # batch_size=32, seq_len=10, dim_vid=2048
     output, hidden = encoder(vid_feats)
     print(f"Output shape: {output.shape}")  # Expected: [32, 10, 512]
     print(f"Hidden shape: {hidden.shape}")  # Expected: [1, 32, 512] for GRU
