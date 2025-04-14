@@ -1,4 +1,4 @@
-__author__ = 'rama'
+# __author__ = 'rama'
 from tokenizer.ptbtokenizer import PTBTokenizer
 from cider.cider import Cider
 from ciderD.ciderD import CiderD

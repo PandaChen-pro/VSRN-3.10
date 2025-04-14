@@ -49,7 +49,7 @@ class LogCollector:
 
     def tb_log(self, tb_logger, prefix='', step=None):
         for k, v in self.meters.items():
-            tb_logger.log_value(prefix + k, v.val, step=step)
+            tb_logger.add_scalar(prefix + k, v.val, step)
 
 
 def encode_data(model, data_loader):
