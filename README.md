@@ -21,7 +21,7 @@ pip install  pycocotools -i https://pypi.mirrors.ustc.edu.cn/simple/
 ```shell
 conda create -n vsrn python=3.10
 conda activate vsrn
-pip install torch torchvision -i https://pypi.mirrors.ustc.edu.cn/simple/
+pip install torch==2.3.0 torchvision -i https://pypi.mirrors.ustc.edu.cn/simple/
 # 安装pycocotools后不再需要cocoapi-master文件夹
 apt-get update
 apt install openjdk-11-jre

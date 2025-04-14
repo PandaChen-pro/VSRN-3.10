@@ -12,7 +12,7 @@ from model import VSRN
 from evaluation import i2t, t2i, AverageMeter, LogCollector, encode_data
 import logging
 import argparse
-
+import wandb
 
 def main():
     parser = argparse.ArgumentParser(description='VSRN Training Script')
@@ -53,9 +53,15 @@ def main():
     parser.add_argument('--rnn_dropout_p', type=float, default=0.5, help='dropout in the Language Model RNN')
     parser.add_argument('--dim_word', type=int, default=300, help='encoding size of each token')
     parser.add_argument('--max_len', type=int, default=60, help='max length of captions (including <sos>,<eos>)')
+    parser.add_argument('--use_wandb', action='store_true', default=True, help='Use Weights & Biases for logging')
+    parser.add_argument('--wandb_project', default='VSRN', help='Project name for Weights & Biases')
+    parser.add_argument('--wandb_name', default='VSRN', help='Run name for Weights & Biases')
+
 
     opt = parser.parse_args()
     print(opt)
+    if opt.use_wandb:
+        wandb.init(project=opt.wandb_project, name=opt.wandb_name, config=vars(opt))
 
     logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
     tb_logger = SummaryWriter(log_dir=opt.logger_name, flush_secs=5)
@@ -71,6 +77,8 @@ def main():
 
     # Construct the model
     model = VSRN(opt)
+    if opt.use_wandb:
+        wandb.watch(model, log="all")
 
     # Resume from checkpoint if provided
     start_epoch = 0
@@ -109,7 +117,9 @@ def train(opt, train_loader, model, epoch, val_loader, best_rsum):
     batch_time = AverageMeter()
     data_time = AverageMeter()
     train_logger = LogCollector()
+    tb_logger = SummaryWriter(log_dir=opt.logger_name)
 
+    # 确保模型处于训练模式
     model.train_start()
     end = time.time()
 
@@ -132,12 +142,27 @@ def train(opt, train_loader, model, epoch, val_loader, best_rsum):
                 f'Data {data_time.val:.3f} ({data_time.avg:.3f})'
             )
 
-        tb_logger = SummaryWriter(log_dir=opt.logger_name)
         tb_logger.add_scalar('epoch', epoch, global_step=model.Eiters)
         tb_logger.add_scalar('step', i, global_step=model.Eiters)
         tb_logger.add_scalar('batch_time', batch_time.val, global_step=model.Eiters)
         tb_logger.add_scalar('data_time', data_time.val, global_step=model.Eiters)
         model.logger.tb_log(tb_logger, step=model.Eiters)
+
+        if opt.use_wandb:
+                # 创建一个字典包含所有要记录的指标
+                metrics = {
+                    'train/epoch': epoch,
+                    'train/step': i,
+                    'train/batch_time': batch_time.val,
+                    'train/data_time': data_time.val,
+                }
+                
+                # 从model.logger获取训练指标并添加到metrics
+                for key, value in model.logger.meters.items():
+                    metrics[f'train/{key}'] = value.val
+                
+                # 记录到wandb
+                wandb.log(metrics, step=model.Eiters)
 
         if model.Eiters % opt.val_step == 0:
             rsum = validate(opt, val_loader, model)
@@ -155,14 +180,26 @@ def train(opt, train_loader, model, epoch, val_loader, best_rsum):
 
 
 def validate(opt, val_loader, model):
-    img_embs, cap_embs = encode_data(model, val_loader, opt.log_step, logging.info)
-    (r1, r5, r10, medr, meanr) = i2t(img_embs, cap_embs, measure=opt.measure)
-    logging.info(f"Image to text: {r1:.1f}, {r5:.1f}, {r10:.1f}, {medr:.1f}, {meanr:.1f}")
-    (r1i, r5i, r10i, medri, meanr) = t2i(img_embs, cap_embs, measure=opt.measure)
-    logging.info(f"Text to image: {r1i:.1f}, {r5i:.1f}, {r10i:.1f}, {medri:.1f}, {meanr:.1f}")
+    tb_logger = SummaryWriter(log_dir=opt.logger_name)
+    img_embs, cap_embs = encode_data(model, val_loader)
+    
+    # Get metrics for image-to-text
+    metrics = i2t(img_embs, cap_embs, measure=opt.measure)
+    if isinstance(metrics, tuple) and len(metrics) == 2:
+        metrics = metrics[0]  # Take only the metrics, not the ranks
+    r1, r5, r10, medr, meanr = metrics
+    logging.info(f"Image to text: {r1:.3f}, {r5:.3f}, {r10:.3f}, {medr:.3f}, {meanr:.3f}")
+    logging.info(f"metrics: {metrics}")
+    
+    # Get metrics for text-to-image
+    metrics = t2i(img_embs, cap_embs, measure=opt.measure)
+    if isinstance(metrics, tuple) and len(metrics) == 2:
+        metrics = metrics[0]  # Take only the metrics, not the ranks
+    r1i, r5i, r10i, medri, meanr = metrics
+    logging.info(f"Text to image: {r1i:.3f}, {r5i:.3f}, {r10i:.3f}, {medri:.3f}, {meanr:.3f}")
+    
     currscore = r1 + r5 + r1i + r5i
 
-    tb_logger = SummaryWriter(log_dir=opt.logger_name)
     tb_logger.add_scalar('r1', r1, global_step=model.Eiters)
     tb_logger.add_scalar('r5', r5, global_step=model.Eiters)
     tb_logger.add_scalar('r10', r10, global_step=model.Eiters)
@@ -175,6 +212,22 @@ def validate(opt, val_loader, model):
     tb_logger.add_scalar('meanr', meanr, global_step=model.Eiters)
     tb_logger.add_scalar('rsum', currscore, global_step=model.Eiters)
 
+
+    if opt.use_wandb:
+        if hasattr(opt, 'use_wandb') and opt.use_wandb:
+            wandb_metrics = {
+                'val/r1': r1,
+                'val/r5': r5,
+                'val/r10': r10,
+                'val/medr': medr,
+                'val/meanr': meanr,
+                'val/r1i': r1i,
+                'val/r5i': r5i,
+                'val/r10i': r10i,
+                'val/medri': medri,
+                'val/rsum': currscore
+            }
+            wandb.log(wandb_metrics, step=model.Eiters)
     return currscore
 
 

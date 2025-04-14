@@ -270,9 +270,33 @@ class VSRN(nn.Module):
         self.txt_enc.load_state_dict(state_dict[1])
 
     def train_start(self):
+        """确保所有组件都处于训练模式"""
+        # 首先将整个模型设置为训练模式
+        self.train()
+        
+        # 确保主要组件处于训练模式
         self.img_enc.train()
         self.txt_enc.train()
         self.caption_model.train()
+        
+        # 特别确保所有RNN组件处于训练模式
+        self.encoder.train()
+        self.decoder.train()
+        
+        # 递归确保EncoderImagePrecompAttn中的img_rnn处于训练模式
+        if hasattr(self.img_enc, 'img_rnn'):
+            self.img_enc.img_rnn.train()
+        
+        # 确保EncoderText中的rnn处于训练模式
+        if hasattr(self.txt_enc, 'rnn'):
+            self.txt_enc.rnn.train()
+        
+        # 打印训练状态以进行调试
+        print("Model training mode:", self.training)
+        print("img_enc training mode:", self.img_enc.training)
+        print("txt_enc training mode:", self.txt_enc.training)
+        print("caption_model training mode:", self.caption_model.training)
+
 
     def val_start(self):
         self.img_enc.eval()
@@ -292,6 +316,13 @@ class VSRN(nn.Module):
         return loss
 
     def train_emb(self, images, captions, lengths, ids, caption_labels, caption_masks, *args):
+        self.train()
+        self.img_enc.train()
+        self.txt_enc.train()
+        self.caption_model.train()
+        self.encoder.train()
+        self.decoder.train()
+        
         self.Eiters += 1
         self.logger.update('Eit', self.Eiters)
         self.logger.update('lr', self.optimizer.param_groups[0]['lr'])
