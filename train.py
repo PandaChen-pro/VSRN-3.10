@@ -12,7 +12,7 @@ from model import VSRN
 from evaluation import i2t, t2i, AverageMeter, LogCollector, encode_data
 import logging
 import argparse
-
+import wandb
 
 def main():
     parser = argparse.ArgumentParser(description='VSRN Training Script')
@@ -31,7 +31,7 @@ def main():
     parser.add_argument('--lr_update', default=15, type=int, help='Number of epochs to update the learning rate.')
     parser.add_argument('--workers', default=10, type=int, help='Number of data loader workers.')
     parser.add_argument('--log_step', default=10, type=int, help='Number of steps to print and record the log.')
-    parser.add_argument('--val_step', default=30, type=int, help='Number of steps to run validation.')
+    parser.add_argument('--val_step', default=500, type=int, help='Number of steps to run validation.')
     parser.add_argument('--logger_name', default='runs/runX', help='Path to save the model and Tensorboard log.')
     parser.add_argument('--resume', default='', type=str, help='path to latest checkpoint (default: none)')
     parser.add_argument('--max_violation', action='store_true', help='Use max instead of sum in the rank loss.')
@@ -53,9 +53,15 @@ def main():
     parser.add_argument('--rnn_dropout_p', type=float, default=0.5, help='dropout in the Language Model RNN')
     parser.add_argument('--dim_word', type=int, default=300, help='encoding size of each token')
     parser.add_argument('--max_len', type=int, default=60, help='max length of captions (including <sos>,<eos>)')
+    parser.add_argument('--use_wandb', action='store_true', default=True, help='Use Weights & Biases for logging')
+    parser.add_argument('--wandb_project', default='VSRN', help='Project name for Weights & Biases')
+    parser.add_argument('--wandb_name', default='VSRN', help='Run name for Weights & Biases')
+
 
     opt = parser.parse_args()
     print(opt)
+    if opt.use_wandb:
+        wandb.init(project=opt.wandb_project, name=opt.wandb_name, config=vars(opt))
 
     logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
     tb_logger = SummaryWriter(log_dir=opt.logger_name, flush_secs=5)
@@ -71,6 +77,8 @@ def main():
 
     # Construct the model
     model = VSRN(opt)
+    if opt.use_wandb:
+        wandb.watch(model, log="all")
 
     # Resume from checkpoint if provided
     start_epoch = 0
@@ -140,6 +148,22 @@ def train(opt, train_loader, model, epoch, val_loader, best_rsum):
         tb_logger.add_scalar('data_time', data_time.val, global_step=model.Eiters)
         model.logger.tb_log(tb_logger, step=model.Eiters)
 
+        if opt.use_wandb:
+                # 创建一个字典包含所有要记录的指标
+                metrics = {
+                    'train/epoch': epoch,
+                    'train/step': i,
+                    'train/batch_time': batch_time.val,
+                    'train/data_time': data_time.val,
+                }
+                
+                # 从model.logger获取训练指标并添加到metrics
+                for key, value in model.logger.meters.items():
+                    metrics[f'train/{key}'] = value.val
+                
+                # 记录到wandb
+                wandb.log(metrics, step=model.Eiters)
+
         if model.Eiters % opt.val_step == 0:
             rsum = validate(opt, val_loader, model)
             is_best = rsum > best_rsum
@@ -188,6 +212,22 @@ def validate(opt, val_loader, model):
     tb_logger.add_scalar('meanr', meanr, global_step=model.Eiters)
     tb_logger.add_scalar('rsum', currscore, global_step=model.Eiters)
 
+
+    if opt.use_wandb:
+        if hasattr(opt, 'use_wandb') and opt.use_wandb:
+            wandb_metrics = {
+                'val/r1': r1,
+                'val/r5': r5,
+                'val/r10': r10,
+                'val/medr': medr,
+                'val/meanr': meanr,
+                'val/r1i': r1i,
+                'val/r5i': r5i,
+                'val/r10i': r10i,
+                'val/medri': medri,
+                'val/rsum': currscore
+            }
+            wandb.log(wandb_metrics, step=model.Eiters)
     return currscore
 
 
