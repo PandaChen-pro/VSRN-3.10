@@ -21,5 +21,22 @@ pip install  pycocotools -i https://pypi.mirrors.ustc.edu.cn/simple/
 pip install tensorboard -i https://pypi.mirrors.ustc.edu.cn/simple/
 pip install tensorboard_logger -i https://pypi.mirrors.ustc.edu.cn/simple/
 pip install nltk -i https://pypi.mirrors.ustc.edu.cn/simple/
-python -c "import nltk;nltk.download()"
 ```
+## 下载punkt包
+```shell
+# 安装shell crash
+export url='https://fastly.jsdelivr.net/gh/juewuy/ShellCrash@master' && wget -q --no-check-certificate -O /tmp/install.sh $url/install.sh  && bash /tmp/install.sh && source /etc/profile &> /dev/null
+# 翻墙机场:https://www3rd.ga-sub.lat/api/v1/client/subscribe?token=ad0c48690287bf56df1787929bc06ecc
+# 元机场:https://185.213.174.24/search?token=aa7b304f1804142441a2410a51876b2b
+python ./utils/download_nltk.py
+```
+
+## 执行evaluate
+修改`/data/coding/VSRN-3.10/evaluate_models.py`，修改模型和数据所在路径。
+```python
+# MsCoCo
+evaluation_models.evalrank("/data/coding/upload-data/data/pretrain_model/coco/model_coco_1.pth.tar", "/data/coding/upload-data/data/pretrain_model/coco/model_coco_2.pth.tar", data_path='/data/coding/upload-data/data/data/', split="testall", fold5=True)
+# Fliker
+evaluation_models.evalrank("/data/coding/upload-data/data/pretrain_model/flickr/model_fliker_1.pth.tar", "/data/coding/upload-data/data/pretrain_model/flickr/model_fliker_2.pth.tar", data_path='/data/coding/upload-data/data/data/', split="test", fold5=False)
+```
+

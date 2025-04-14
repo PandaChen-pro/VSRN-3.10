@@ -218,8 +218,9 @@ class ContrastiveLoss(nn.Module):
         return cost_s.sum() + cost_im.sum()
 
 
-class VSRN:
+class VSRN(nn.Module):
     def __init__(self, opt):
+        super(VSRN, self).__init__()
         self.grad_clip = opt.grad_clip
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -252,7 +253,7 @@ class VSRN:
         self.optimizer = optim.Adam(params, lr=opt.learning_rate)
 
         self.Eiters = 0
-        self.logger = utils.Logger()  # 假设存在此工具类
+        # self.logger = utils.Logger()  # 假设存在此工具类
 
     def calculate_caption_loss(self, fc_feats, labels, masks):
         labels = labels.to(self.device)

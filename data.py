@@ -194,7 +194,7 @@ class PrecompDataset(data.Dataset):
         cap_caption = ['<start>'] + tokens + ['<end>']
         if len(cap_caption) > self.max_len - 1:
             cap_caption = cap_caption[:self.max_len]
-            cap_caption[-1] = '<end>']
+            cap_caption[-1] = '<end>'
 
         for j, w in enumerate(cap_caption):
             gts[j] = vocab(w)

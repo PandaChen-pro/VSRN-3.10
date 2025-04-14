@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from Attention import Attention
+from .Attention import Attention
 
 
 class DecoderRNN(nn.Module):
