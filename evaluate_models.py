@@ -4,7 +4,7 @@ import evaluation_models
 import torch.serialization
 import argparse 
 
-torch.serialization.add_safe_globals([argparse.Namespace])
+# torch.serialization.add_safe_globals([argparse.Namespace])
 
 
 # for coco

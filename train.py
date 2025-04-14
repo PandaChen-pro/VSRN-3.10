@@ -31,7 +31,7 @@ def main():
     parser.add_argument('--lr_update', default=15, type=int, help='Number of epochs to update the learning rate.')
     parser.add_argument('--workers', default=10, type=int, help='Number of data loader workers.')
     parser.add_argument('--log_step', default=10, type=int, help='Number of steps to print and record the log.')
-    parser.add_argument('--val_step', default=500, type=int, help='Number of steps to run validation.')
+    parser.add_argument('--val_step', default=30, type=int, help='Number of steps to run validation.')
     parser.add_argument('--logger_name', default='runs/runX', help='Path to save the model and Tensorboard log.')
     parser.add_argument('--resume', default='', type=str, help='path to latest checkpoint (default: none)')
     parser.add_argument('--max_violation', action='store_true', help='Use max instead of sum in the rank loss.')
@@ -109,7 +109,9 @@ def train(opt, train_loader, model, epoch, val_loader, best_rsum):
     batch_time = AverageMeter()
     data_time = AverageMeter()
     train_logger = LogCollector()
+    tb_logger = SummaryWriter(log_dir=opt.logger_name)
 
+    # 确保模型处于训练模式
     model.train_start()
     end = time.time()
 
@@ -132,7 +134,6 @@ def train(opt, train_loader, model, epoch, val_loader, best_rsum):
                 f'Data {data_time.val:.3f} ({data_time.avg:.3f})'
             )
 
-        tb_logger = SummaryWriter(log_dir=opt.logger_name)
         tb_logger.add_scalar('epoch', epoch, global_step=model.Eiters)
         tb_logger.add_scalar('step', i, global_step=model.Eiters)
         tb_logger.add_scalar('batch_time', batch_time.val, global_step=model.Eiters)
@@ -155,14 +156,26 @@ def train(opt, train_loader, model, epoch, val_loader, best_rsum):
 
 
 def validate(opt, val_loader, model):
-    img_embs, cap_embs = encode_data(model, val_loader, opt.log_step, logging.info)
-    (r1, r5, r10, medr, meanr) = i2t(img_embs, cap_embs, measure=opt.measure)
-    logging.info(f"Image to text: {r1:.1f}, {r5:.1f}, {r10:.1f}, {medr:.1f}, {meanr:.1f}")
-    (r1i, r5i, r10i, medri, meanr) = t2i(img_embs, cap_embs, measure=opt.measure)
-    logging.info(f"Text to image: {r1i:.1f}, {r5i:.1f}, {r10i:.1f}, {medri:.1f}, {meanr:.1f}")
+    tb_logger = SummaryWriter(log_dir=opt.logger_name)
+    img_embs, cap_embs = encode_data(model, val_loader)
+    
+    # Get metrics for image-to-text
+    metrics = i2t(img_embs, cap_embs, measure=opt.measure)
+    if isinstance(metrics, tuple) and len(metrics) == 2:
+        metrics = metrics[0]  # Take only the metrics, not the ranks
+    r1, r5, r10, medr, meanr = metrics
+    logging.info(f"Image to text: {r1:.3f}, {r5:.3f}, {r10:.3f}, {medr:.3f}, {meanr:.3f}")
+    logging.info(f"metrics: {metrics}")
+    
+    # Get metrics for text-to-image
+    metrics = t2i(img_embs, cap_embs, measure=opt.measure)
+    if isinstance(metrics, tuple) and len(metrics) == 2:
+        metrics = metrics[0]  # Take only the metrics, not the ranks
+    r1i, r5i, r10i, medri, meanr = metrics
+    logging.info(f"Text to image: {r1i:.3f}, {r5i:.3f}, {r10i:.3f}, {medri:.3f}, {meanr:.3f}")
+    
     currscore = r1 + r5 + r1i + r5i
 
-    tb_logger = SummaryWriter(log_dir=opt.logger_name)
     tb_logger.add_scalar('r1', r1, global_step=model.Eiters)
     tb_logger.add_scalar('r5', r5, global_step=model.Eiters)
     tb_logger.add_scalar('r10', r10, global_step=model.Eiters)

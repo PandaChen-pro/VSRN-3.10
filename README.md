@@ -21,7 +21,7 @@ pip install  pycocotools -i https://pypi.mirrors.ustc.edu.cn/simple/
 ```shell
 conda create -n vsrn python=3.10
 conda activate vsrn
-pip install torch torchvision -i https://pypi.mirrors.ustc.edu.cn/simple/
+pip install torch==2.3.0 torchvision -i https://pypi.mirrors.ustc.edu.cn/simple/
 # 安装pycocotools后不再需要cocoapi-master文件夹
 apt-get update
 apt install openjdk-11-jre
@@ -51,3 +51,16 @@ evaluation_models.evalrank("/data/coding/upload-data/data/pretrain_model/coco/mo
 evaluation_models.evalrank("/data/coding/upload-data/data/pretrain_model/flickr/model_fliker_1.pth.tar", "/data/coding/upload-data/data/pretrain_model/flickr/model_fliker_2.pth.tar", data_path='/data/coding/upload-data/data/data/', split="test", fold5=False)
 ```
 
+## 执行训练
+`export DATA_PATH=/data/coding/upload-data/data/data`
+对于 MSCOCO：
+```shell
+python train.py --data_path $DATA_PATH --data_name coco_precomp --logger_name runs/coco_VSRN --max_violation
+```
+建议执行Flickr30K数据集，MSCOCO数据集过大，需要巨大的主存占用，Flickr30K仅需25G主存、9G显存即可跑起来。
+
+对于 Flickr30K：
+```shell
+python train.py --data_path $DATA_PATH --data_name f30k_precomp --logger_name runs/flickr_VSRN --max_violation --lr_update 10  --max_len 60
+
+```

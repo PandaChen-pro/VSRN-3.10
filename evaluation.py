@@ -49,7 +49,7 @@ class LogCollector:
 
     def tb_log(self, tb_logger, prefix='', step=None):
         for k, v in self.meters.items():
-            tb_logger.log_value(prefix + k, v.val, step=step)
+            tb_logger.add_scalar(prefix + k, v.val, step)
 
 
 def encode_data(model, data_loader):
@@ -204,8 +204,21 @@ def i2t(images, captions, npts=None, measure='cosine', return_ranks=False):
     r10 = 100.0 * np.sum(ranks < 10) / len(ranks)
     medr = np.floor(np.median(ranks)) + 1
     meanr = ranks.mean() + 1
-    return (r1, r5, r10, medr, meanr), (ranks, top1) if return_ranks else (r1, r5, r10, medr, meanr)
+    # return (r1, r5, r10, medr, meanr), (ranks, top1) if return_ranks else (r1, r5, r10, medr, meanr)
 
+    # print(f"--- Debug i2t ---")
+    # print(f"return_ranks value: {return_ranks}")
+    return (r1, r5, r10, medr, meanr), (ranks, top1) if return_ranks else (r1, r5, r10, medr, meanr)
+    print(f"Type of returned value: {type(result_to_return)}")
+    try:
+        print(f"Length of returned value: {len(result_to_return)}")
+    except TypeError:
+        print(f"Returned value is not a sequence (cannot get len)")
+    print(f"Actual value being returned: {result_to_return}")
+    print(f"--- End Debug i2t ---")
+    # --- 结束调试打印 ---
+    return result_to_return # 返回之前计算好的结果
+    
 
 def t2i(images, captions, npts=None, measure='cosine', return_ranks=False):
     """
