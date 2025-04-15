@@ -5,3 +5,15 @@
 {"time":"2025-04-14T20:07:24.90615636+08:00","level":"INFO","msg":"writer: Do: started","stream_id":"r1wiw9ng"}
 {"time":"2025-04-14T20:07:24.90622769+08:00","level":"INFO","msg":"handler: started","stream_id":"r1wiw9ng"}
 {"time":"2025-04-14T20:07:25.355526047+08:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-04-14T21:03:51.091142771+08:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/graphql\": unexpected EOF"}
+{"time":"2025-04-14T21:03:52.373890484+08:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/laccoliths/VSRN/r1wiw9ng/file_stream\": EOF"}
+{"time":"2025-04-14T21:03:54.792948813+08:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/laccoliths/VSRN/r1wiw9ng/file_stream\": EOF"}
+{"time":"2025-04-14T21:03:54.792948843+08:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/graphql\": EOF"}
+{"time":"2025-04-15T05:11:17.632167743+08:00","level":"INFO","msg":"stream: closing","id":"r1wiw9ng"}
+{"time":"2025-04-15T05:11:17.632213172+08:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-04-15T05:11:17.632251337+08:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-04-15T05:11:20.206965099+08:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-04-15T05:11:21.16315379+08:00","level":"INFO","msg":"handler: closed","stream_id":"r1wiw9ng"}
+{"time":"2025-04-15T05:11:21.163217746+08:00","level":"INFO","msg":"writer: Close: closed","stream_id":"r1wiw9ng"}
+{"time":"2025-04-15T05:11:21.163229609+08:00","level":"INFO","msg":"sender: closed","stream_id":"r1wiw9ng"}
+{"time":"2025-04-15T05:11:21.163369182+08:00","level":"INFO","msg":"stream: closed","id":"r1wiw9ng"}

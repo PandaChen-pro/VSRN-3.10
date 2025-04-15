@@ -1,0 +1,103 @@
+_wandb:
+    value:
+        cli_version: 0.19.9
+        m: []
+        python_version: 3.10.16
+        t:
+            "1":
+                - 1
+                - 41
+                - 55
+            "2":
+                - 1
+                - 41
+                - 55
+            "3":
+                - 1
+                - 13
+                - 16
+                - 23
+                - 55
+                - 61
+            "4": 3.10.16
+            "5": 0.19.9
+            "8":
+                - 5
+            "12": 0.19.9
+            "13": linux-x86_64
+batch_size:
+    value: 128
+bidirectional:
+    value: 0
+cnn_type:
+    value: vgg19
+crop_size:
+    value: 224
+data_name:
+    value: f30k_precomp
+data_path:
+    value: /data/coding/upload-data/data/data
+dim_hidden:
+    value: 512
+dim_vid:
+    value: 2048
+dim_word:
+    value: 300
+embed_size:
+    value: 2048
+finetune:
+    value: false
+grad_clip:
+    value: 2
+img_dim:
+    value: 2048
+input_dropout_p:
+    value: 0.2
+learning_rate:
+    value: 0.0002
+log_step:
+    value: 10
+logger_name:
+    value: runs/flickr_VSRN
+lr_update:
+    value: 10
+margin:
+    value: 0.2
+max_len:
+    value: 60
+max_violation:
+    value: true
+measure:
+    value: cosine
+no_imgnorm:
+    value: false
+num_epochs:
+    value: 30
+num_layers:
+    value: 1
+reset_train:
+    value: false
+resume:
+    value: ""
+rnn_dropout_p:
+    value: 0.5
+rnn_type:
+    value: gru
+use_abs:
+    value: false
+use_restval:
+    value: false
+use_wandb:
+    value: true
+val_step:
+    value: 500
+vocab_path:
+    value: ./vocab/
+wandb_name:
+    value: VSRN
+wandb_project:
+    value: VSRN
+word_dim:
+    value: 300
+workers:
+    value: 10
