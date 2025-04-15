@@ -1,5 +1,5 @@
 # VSRN项目
-[VSRN原项目](https://github.com/KunpengLi1994/VSRN/tree/master)基于Python2.7、torch0.4.1撰写，版本过于老旧，现在租服务器很难满足这样的环境版本需求，在此对原始的VSRN项目基于Python3.10、torch2.0进行重写。
+[VSRN原项目](https://github.com/KunpengLi1994/VSRN/tree/master)基于Python2.7、torch0.4.1撰写，版本过于老旧，现在租服务器很难满足这样的环境版本需求，在此对原始的VSRN项目基于Python3.10、torch2.3.0进行重写，尝试复现VSRN项目。
 
 VSRN项目是在跨模态系统中一个非常经典的图文检索任务，能够很好地帮助我们更好地掌握跨模态对齐的基础技术以及复现代码的能力。
 
