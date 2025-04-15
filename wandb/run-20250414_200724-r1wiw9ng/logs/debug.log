@@ -21,3 +21,4 @@ config: {'data_path': '/data/coding/upload-data/data/data', 'data_name': 'f30k_p
 2025-04-14 20:07:25,436 INFO    MainThread:27909 [wandb_run.py:_redirect():2394] Redirects installed.
 2025-04-14 20:07:25,437 INFO    MainThread:27909 [wandb_init.py:init():1056] run started, returning control to user process
 2025-04-14 20:07:39,614 INFO    MainThread:27909 [wandb_watch.py:_watch():71] Watching
+2025-04-15 05:11:17,630 INFO    MsgRouterThr:27909 [mailbox.py:close():129] [no run ID] Closing mailbox, abandoning 1 handles.
