@@ -37,8 +37,6 @@ pip install nltk -i https://pypi.mirrors.ustc.edu.cn/simple/
 export url='https://fastly.jsdelivr.net/gh/juewuy/ShellCrash@master' && wget -q --no-check-certificate -O /tmp/install.sh $url/install.sh  && bash /tmp/install.sh && source /etc/profile &> /dev/null
 export http_proxy=http://127.0.0.1:7890
 export https_proxy=http://127.0.0.1:7890
-# 翻墙机场:https://www3rd.ga-sub.lat/api/v1/client/subscribe?token=ad0c48690287bf56df1787929bc06ecc
-# 元机场:https://185.213.174.24/search?token=aa7b304f1804142441a2410a51876b2b
 python ./utils/download_nltk.py
 ```
 
@@ -52,7 +50,9 @@ evaluation_models.evalrank("/data/coding/upload-data/data/pretrain_model/flickr/
 ```
 
 ## 执行训练
+将数据集导入环境变量：
 `export DATA_PATH=/data/coding/upload-data/data/data`
+
 对于 MSCOCO：
 ```shell
 python train.py --data_path $DATA_PATH --data_name coco_precomp --logger_name runs/coco_VSRN --max_violation
