@@ -31,6 +31,7 @@ def EncoderImage(data_name, img_dim, embed_size, finetune=False,
         # 使用GCN+Attention
         if use_txt_emb:
             # GCN+Attention Encoder
+            # GCN将本节点的特征和所有邻居节点的特征汇聚过来，组合成这个节点的特征
             img_enc = EncoderImagePrecompAttn(
                 img_dim, embed_size, data_name, use_abs, no_imgnorm)
         else:
