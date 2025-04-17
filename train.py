@@ -114,6 +114,7 @@ def main():
 
 
 def train(opt, train_loader, model, epoch, val_loader, best_rsum):
+    # AverageMeter()是用于计算和存储平均值的辅助类，根据训练日志。
     batch_time = AverageMeter()
     data_time = AverageMeter()
     train_logger = LogCollector()
@@ -129,6 +130,8 @@ def train(opt, train_loader, model, epoch, val_loader, best_rsum):
 
         data_time.update(time.time() - end)
         model.logger = train_logger
+        # 训练图像-文本的联合嵌入(joint embedding)，学习图像和文本的联合嵌入空间，确保语义相关的图像-文本对在嵌入空间距离更近
+        # 实现视觉语义推理的训练过程
         model.train_emb(*train_data)
 
         batch_time.update(time.time() - end)
@@ -164,6 +167,7 @@ def train(opt, train_loader, model, epoch, val_loader, best_rsum):
                 # 记录到wandb
                 wandb.log(metrics, step=model.Eiters)
 
+        # evaluation
         if model.Eiters % opt.val_step == 0:
             rsum = validate(opt, val_loader, model)
             is_best = rsum > best_rsum

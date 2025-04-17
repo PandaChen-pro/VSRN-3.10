@@ -253,7 +253,7 @@ class VSRN(nn.Module):
         self.optimizer = optim.Adam(params, lr=opt.learning_rate)
 
         self.Eiters = 0
-        # self.logger = utils.Logger()  # 假设存在此工具类
+        # self.logger = utils.Logger()  
 
     def calculate_caption_loss(self, fc_feats, labels, masks):
         labels = labels.to(self.device)
@@ -271,19 +271,15 @@ class VSRN(nn.Module):
 
     def train_start(self):
         """确保所有组件都处于训练模式"""
-        # 首先将整个模型设置为训练模式
         self.train()
         
-        # 确保主要组件处于训练模式
         self.img_enc.train()
         self.txt_enc.train()
         self.caption_model.train()
-        
-        # 特别确保所有RNN组件处于训练模式
         self.encoder.train()
         self.decoder.train()
         
-        # 递归确保EncoderImagePrecompAttn中的img_rnn处于训练模式
+        # 确保EncoderImagePrecompAttn中的img_rnn处于训练模式
         if hasattr(self.img_enc, 'img_rnn'):
             self.img_enc.img_rnn.train()
         
@@ -291,7 +287,6 @@ class VSRN(nn.Module):
         if hasattr(self.txt_enc, 'rnn'):
             self.txt_enc.rnn.train()
         
-        # 打印训练状态以进行调试
         print("Model training mode:", self.training)
         print("img_enc training mode:", self.img_enc.training)
         print("txt_enc training mode:", self.txt_enc.training)
@@ -316,6 +311,7 @@ class VSRN(nn.Module):
         return loss
 
     def train_emb(self, images, captions, lengths, ids, caption_labels, caption_masks, *args):
+        # 设置模型和所有的模块都处在训练模式
         self.train()
         self.img_enc.train()
         self.txt_enc.train()
@@ -323,10 +319,12 @@ class VSRN(nn.Module):
         self.encoder.train()
         self.decoder.train()
         
+        # 全局迭代器
         self.Eiters += 1
         self.logger.update('Eit', self.Eiters)
         self.logger.update('lr', self.optimizer.param_groups[0]['lr'])
 
+        # 前向传播，获取图像和文本的嵌入表示 返回图像的embedding, 文本的embedding, 经过GCN处理后的图像特征
         img_emb, cap_emb, GCN_img_emd = self.forward_emb(images, captions, lengths)
         self.optimizer.zero_grad()
 
