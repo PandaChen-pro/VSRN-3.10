@@ -301,7 +301,9 @@ class VSRN(nn.Module):
     def forward_emb(self, images, captions, lengths):
         images = images.to(self.device)
         captions = captions.to(self.device)
+        # 调用图像编码器，接收文本描述和对应的实际长度，输出文本的嵌入表示
         cap_emb = self.txt_enc(captions, lengths)
+        # 接收图像数据，输出图像的嵌入表示代表整个图像的全局特征、经过图卷积神经网络处理后的图像特征，通常是更细粒度的区域特征或对象特征
         img_emb, GCN_img_emd = self.img_enc(images)
         return img_emb, cap_emb, GCN_img_emd
 
@@ -326,16 +328,22 @@ class VSRN(nn.Module):
 
         # 前向传播，获取图像和文本的嵌入表示 返回图像的embedding, 文本的embedding, 经过GCN处理后的图像特征
         img_emb, cap_emb, GCN_img_emd = self.forward_emb(images, captions, lengths)
+        # 计算新梯度前，清空优化器中累积的旧梯度
         self.optimizer.zero_grad()
 
+        # 计算caption的损失，使用GCN处理后的图像特征、真实caption标签和对应的掩码来计算损失
         caption_loss = self.calculate_caption_loss(GCN_img_emd, caption_labels, caption_masks)
+        # 计算retrieval的损失，使用图像的embedding和文本的embedding来计算损失
         retrieval_loss = self.forward_loss(img_emb, cap_emb)
+        # 总loss，多任务学习，同时优化retrieval和caption的损失
         loss = retrieval_loss + caption_loss
 
         self.logger.update('Le_caption', caption_loss.item(), img_emb.size(0))
         self.logger.update('Le', loss.item(), img_emb.size(0))
 
         loss.backward()
+        # 梯度裁剪，防止梯度爆炸
         if self.grad_clip > 0:
             clip_grad_norm_(self.params, self.grad_clip)
+        # 更新模型参数
         self.optimizer.step()
