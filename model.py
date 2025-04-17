@@ -26,14 +26,19 @@ def l2norm(X):
 
 def EncoderImage(data_name, img_dim, embed_size, finetune=False,
                  cnn_type='vgg19', use_abs=False, no_imgnorm=False, use_txt_emb=True):
+    # 如果是预先计算好的图像特征
     if data_name.endswith('_precomp'):
+        # 使用GCN+Attention
         if use_txt_emb:
+            # GCN+Attention Encoder
             img_enc = EncoderImagePrecompAttn(
                 img_dim, embed_size, data_name, use_abs, no_imgnorm)
         else:
+            # 简单的全连接层
             img_enc = EncoderImagePrecomp(
                 img_dim, embed_size, use_abs, no_imgnorm)
     else:
+        # 编码全图
         img_enc = EncoderImageFull(
             embed_size, finetune, cnn_type, use_abs, no_imgnorm)
     return img_enc
