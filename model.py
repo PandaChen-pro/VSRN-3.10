@@ -38,7 +38,8 @@ def EncoderImage(data_name, img_dim, embed_size, finetune=False,
             img_enc = EncoderImagePrecomp(
                 img_dim, embed_size, use_abs, no_imgnorm)
     else:
-        # 编码全图
+
+        # 对全图进行编码
         img_enc = EncoderImageFull(
             embed_size, finetune, cnn_type, use_abs, no_imgnorm)
     return img_enc
